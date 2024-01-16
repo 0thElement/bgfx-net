@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Project">
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputType>Library</OutputType>
+    <AssemblyTitle>BgfxNet.Desktop</AssemblyTitle>
+    <AssemblyName>BgfxNet.Desktop</AssemblyName>
+    <Description>Binding and native libraries for bgfx for Windows, Android and MacOS.</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Nuget">
+    <IsPackable>true</IsPackable>
+    <Title>BgfxNet Desktop</Title>
+    <Description>Bgfx binding and native libraries for .NET on desktop platforms (Windows, Android and MacOS).</Description>
+    <PackageId>BgfxNet.Desktop</PackageId>
+    <PackageTags>graphics framework binding bgfx</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="runtimes\**\native\*">
+      <Pack>true</Pack>
+      <PackagePath>runtimes</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Compile Include="..\..\bgfx\bindings\cs\bgfx.cs" Link="bgfx.cs" />
+  </ItemGroup>
+
+</Project>
