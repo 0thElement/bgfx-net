@@ -76,59 +76,61 @@ jobs:
         with:
           name: bgfx-OSX-${{matrix.platform}}
           path: libbgfx.dylib
-#   buildBgfxLibraryForAndroid:
-#     name: Build bgfx for Android ${{matrix.platform}}
-#     runs-on: ubuntu-latest
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         platform:
-#           - arm
-#           - arm64
-#           - x86_64
-#     steps:
-#     - uses: actions/checkout@v3
-#       with:
-#         fetch-depth: 1
-#         lfs: true
-#         submodules: recursive
-#     - name: Build library
-#       run: |
-#         cd bgfx
-#         ../bx/tools/bin/linux/genie --with-shared-lib --gcc=android-${{matrix.platform}} gmake
-#         make android-${{matrix.platform}}-release
-#     - uses: actions/upload-artifact@v3
-#       with:
-#         name: bgfx-Android-${{matrix.platform}}
-#         path: bgfx/.build/
-#   buildBgfxLibraryForiOS:
-#     name: Build bgfx for iOS ${{matrix.platform}}
-#     runs-on: macos-latest
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         platform:
-#           - arm
-#           - arm64
-#     steps:
-#     - uses: actions/checkout@v3
-#       with:
-#         fetch-depth: 1
-#         lfs: true
-#         submodules: recursive
-#     - name: Build library
-#       run: |
-#         cd bgfx
-#         ../bx/tools/bin/darwin/genie --with-shared-lib --xcode=ios xcode9
-#         make ios-${{matrix.platform}}-release
-#     - uses: actions/upload-artifact@v3
-#       with:
-#         name: bgfx-iOS-${{matrix.platform}}
-#         path: bgfx/.build/
+  buildBgfxLibraryForAndroid:
+    name: Build bgfx for Android ${{matrix.platform}}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - arm
+          - arm64
+          - x86_64
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+        lfs: true
+        submodules: recursive
+    - name: Build library
+      run: |
+        cd bgfx
+        ../bx/tools/bin/linux/genie --with-shared-lib --gcc=android-${{matrix.platform}} gmake
+        make android-${{matrix.platform}}-release
+        cp .build/android-${{matrix.platform}}/bin/libbgfx-shared-libRelease.so ../libbgfx.so
+    - uses: actions/upload-artifact@v4
+      with:
+        name: bgfx-Android-${{matrix.platform}}
+        path: libbgfx.so
+  buildBgfxLibraryForiOS:
+    name: Build bgfx for iOS ${{matrix.platform}}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - arm
+          - arm64
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+        lfs: true
+        submodules: recursive
+    - name: Build library
+      run: |
+        cd bgfx
+        ../bx/tools/bin/darwin/genie --with-shared-lib --xcode=ios xcode9
+        make ios-${{matrix.platform}}-release
+        cp .build/ios-${{matrix.platform}}/bin/libbgfxRelease.a ../libbgfx.a
+    - uses: actions/upload-artifact@v4
+      with:
+        name: bgfx-iOS-${{matrix.platform}}
+        path: libbgfx.a
 
-  buildNugetDesktop:
+  buildNuget:
     name: Build nuget package for desktop platforms
-    needs: [buildBgfxLibraryForWindows, buildBgfxLibraryForLinux]
+    needs: [buildBgfxLibraryForWindows, buildBgfxLibraryForLinux, buildBgfxLibraryForAndroid, buildBgfxLibraryForiOS]
     runs-on: windows-latest
 
     defaults:
@@ -151,27 +153,52 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: bgfx-Windows-x64
-        path: src\BgfxNet.Desktop\runtimes\win-x64\native\
+        path: src\BgfxNet\runtimes\win-x64\native\
     - name: Download artifact (Win x86)
       uses: actions/download-artifact@v4
       with:
         name: bgfx-Windows-Win32
-        path: src\BgfxNet.Desktop\runtimes\win-x86\native\
+        path: src\BgfxNet\runtimes\win-x86\native\
     - name: Download artifact (Linux)
       uses: actions/download-artifact@v4
       with:
         name: bgfx-Linux
-        path: src\BgfxNet.Desktop\runtimes\linux-x64\native\
+        path: src\BgfxNet\runtimes\linux-x64\native\
     - name: Download artifact (OSX arm64)
       uses: actions/download-artifact@v4
       with:
         name: bgfx-OSX-arm64
-        path: src\BgfxNet.Desktop\runtimes\osx-arm64\native\
+        path: src\BgfxNet\runtimes\osx-arm64\native\
     - name: Download artifact (OSX x64)
       uses: actions/download-artifact@v4
       with:
         name: bgfx-OSX-x64
-        path: src\BgfxNet.Desktop\runtimes\osx-x64\native\
+        path: src\BgfxNet\runtimes\osx-x64\native\
+    - name: Download artifact (Android arm)
+      uses: actions/download-artifact@v4
+      with:
+        name: bgfx-Android-arm
+        path: src\BgfxNet\runtimes\android-arm\native\
+    - name: Download artifact (Android arm64)
+      uses: actions/download-artifact@v4
+      with:
+        name: bgfx-Android-arm64
+        path: src\BgfxNet\runtimes\android-arm64\native\
+    - name: Download artifact (Android x86-64)
+      uses: actions/download-artifact@v4
+      with:
+        name: bgfx-Android-x86_64
+        path: src\BgfxNet\runtimes\android-x86_64\native\
+    - name: Download artifact (iOS arm)
+      uses: actions/download-artifact@v4
+      with:
+        name: bgfx-iOS-arm
+        path: src\BgfxNet\runtimes\ios-arm\native\
+    - name: Download artifact (iOS arm64)
+      uses: actions/download-artifact@v4
+      with:
+        name: bgfx-iOS-arm64
+        path: src\BgfxNet\runtimes\ios-arm64\native\
 
     - name: Set artifacts directory
       id: artifactsPath
@@ -179,11 +206,11 @@ jobs:
 
     - name: Pack Nuget
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
-      run: dotnet pack -c Release src\BgfxNet.Desktop /p:Version=${{ github.ref_name }} /p:GenerateDocumentationFile=true /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg -o ${{steps.artifactsPath.outputs.nuget_artifacts}}
+      run: dotnet pack -c Release src\BgfxNet /p:Version=${{ github.ref_name }} /p:GenerateDocumentationFile=true /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg -o ${{steps.artifactsPath.outputs.nuget_artifacts}}
 
     - name: Pack Nuget
       if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-      run: dotnet pack -c Release src\BgfxNet.Desktop /p:GenerateDocumentationFile=true /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg -o ${{steps.artifactsPath.outputs.nuget_artifacts}}
+      run: dotnet pack -c Release src\BgfxNet /p:GenerateDocumentationFile=true /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg -o ${{steps.artifactsPath.outputs.nuget_artifacts}}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4

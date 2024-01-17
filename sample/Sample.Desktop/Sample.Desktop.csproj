@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RollForward>Major</RollForward>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BgfxNet.Desktop" Version="1.0.0" />
     <PackageReference Include="SDL2-CS" Version="2.0.0" />
     <PackageReference Include="SDL2-CS.NetCore" Version="2.0.8" />
   </ItemGroup>
