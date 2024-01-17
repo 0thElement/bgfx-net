@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{51D57BE9-C7D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BgfxNet.Desktop", "src\BgfxNet.Desktop\BgfxNet.Desktop.csproj", "{202001D4-7CE5-420D-8C43-E24B420AFB97}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{E37A3D0A-8E43-4040-9584-10E7635E3110}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Desktop", "sample\Sample.Desktop\Sample.Desktop.csproj", "{A2B18F61-0E8B-4667-A273-1E1AAFF34C73}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,13 @@ Global
 		{202001D4-7CE5-420D-8C43-E24B420AFB97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{202001D4-7CE5-420D-8C43-E24B420AFB97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{202001D4-7CE5-420D-8C43-E24B420AFB97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2B18F61-0E8B-4667-A273-1E1AAFF34C73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2B18F61-0E8B-4667-A273-1E1AAFF34C73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2B18F61-0E8B-4667-A273-1E1AAFF34C73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2B18F61-0E8B-4667-A273-1E1AAFF34C73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{202001D4-7CE5-420D-8C43-E24B420AFB97} = {51D57BE9-C7D7-45FF-98C7-0193635D9B52}
+		{A2B18F61-0E8B-4667-A273-1E1AAFF34C73} = {E37A3D0A-8E43-4040-9584-10E7635E3110}
 	EndGlobalSection
 EndGlobal
