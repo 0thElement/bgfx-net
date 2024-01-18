@@ -77,31 +77,49 @@ jobs:
           name: bgfx-OSX-${{matrix.platform}}
           path: libbgfx.dylib
   buildBgfxLibraryForAndroid:
-    name: Build bgfx for Android ${{matrix.platform}}
+    name: Build bgfx for Android ${{matrix.platform.target}}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         platform:
-          - arm
-          - arm64
-          - x86_64
+          - target: arm
+            ndkLib: arm-linux-androideabi
+          - target: arm64
+            ndkLib: aarch64-linux-android
+          - target: x86_64
+            ndkLib: x86_64-linux-android
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 1
         lfs: true
         submodules: recursive
+    - name: Setup Android NDK
+      id: setup-ndk
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r23c
+    - run: ls -R ${{ steps.setup-ndk.outputs.ndk-path }}
     - name: Build library
+      env:
+        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
       run: |
         cd bgfx
-        ../bx/tools/bin/linux/genie --with-shared-lib --gcc=android-${{matrix.platform}} gmake
-        make android-${{matrix.platform}}-release
-        cp .build/android-${{matrix.platform}}/bin/libbgfx-shared-libRelease.so ../libbgfx.so
+        ../bx/tools/bin/linux/genie --with-shared-lib --gcc=android-${{matrix.platform.target}} gmake
+        make android-${{matrix.platform.target}}-release
+        cp .build/android-${{matrix.platform.target}}/bin/libbgfx-shared-libRelease.so ../libbgfx.so
+        cp ${{steps.setup-ndk.outputs.ndk-path}}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/${{matrix.platform.ndkLib}}/libc++_shared.so ../libc++_shared.so
+        cp ${{steps.setup-ndk.outputs.ndk-path}}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/${{matrix.platform.ndkLib}}/31/libandroid.so ../libandroid.so
+        cp ${{steps.setup-ndk.outputs.ndk-path}}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/${{matrix.platform.ndkLib}}/31/libnativewindow.so ../libnativewindow.so
     - uses: actions/upload-artifact@v4
       with:
-        name: bgfx-Android-${{matrix.platform}}
-        path: libbgfx.so
+        name: bgfx-Android-${{matrix.platform.target}}
+        path: |
+          libbgfx.so
+          libc++_shared.so
+          libandroid.so
+          libnativewindow.so
   buildBgfxLibraryForiOS:
     name: Build bgfx for iOS ${{matrix.platform}}
     runs-on: macos-latest
@@ -129,8 +147,13 @@ jobs:
         path: libbgfx.a
 
   buildNuget:
-    name: Build nuget package for desktop platforms
-    needs: [buildBgfxLibraryForWindows, buildBgfxLibraryForLinux, buildBgfxLibraryForAndroid, buildBgfxLibraryForiOS]
+    name: Build nuget package
+    needs: 
+      - buildBgfxLibraryForWindows
+      - buildBgfxLibraryForLinux
+      - buildBgfxLibraryForOSX
+      - buildBgfxLibraryForAndroid
+      - buildBgfxLibraryForiOS
     runs-on: windows-latest
 
     defaults:
@@ -215,7 +238,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: BgfxNet.Desktop
+        name: BgfxNet
         path: |
             ${{steps.artifactsPath.outputs.nuget_artifacts}}\*.nupkg
             ${{steps.artifactsPath.outputs.nuget_artifacts}}\*.snupkg

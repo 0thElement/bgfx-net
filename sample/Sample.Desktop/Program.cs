@@ -18,12 +18,13 @@ public static unsafe class Program
         }
 
         // Create a new window given a title, size, and passes it a flag indicating it should be shown.
-        nint window = SDL.SDL_CreateWindow("SDL Bgfx sample",
-                                          SDL.SDL_WINDOWPOS_UNDEFINED,
-                                          SDL.SDL_WINDOWPOS_UNDEFINED,
-                                          WindowWidth,
-                                          WindowHeight,
-                                          SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
+        nint window = SDL.SDL_CreateWindow(
+            "SDL Bgfx sample",
+            SDL.SDL_WINDOWPOS_UNDEFINED,
+            SDL.SDL_WINDOWPOS_UNDEFINED,
+            WindowWidth,
+            WindowHeight,
+            SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
 
         if (window == IntPtr.Zero)
         {
@@ -34,6 +35,7 @@ public static unsafe class Program
         var pd = new bgfx.PlatformData();
         SDL.SDL_SysWMinfo wmi = default;
         SDL.SDL_VERSION(out wmi.version);
+        Console.WriteLine($"SDL Version: {wmi.version.major}.{wmi.version.minor}.{wmi.version.patch}");
         if (SDL.SDL_GetWindowWMInfo(window, ref wmi) == SDL.SDL_bool.SDL_FALSE)
         {
             Console.WriteLine($"Could not get window information {SDL.SDL_GetError()}");
@@ -80,18 +82,23 @@ public static unsafe class Program
         // Set the view rect
         bgfx.set_view_rect(0, 0, 0, WindowWidth, WindowHeight);
 
+        // Create the vertex layout
         bgfx.VertexLayout vertexLayout;
         bgfx.vertex_layout_begin(&vertexLayout, bgfxInit.type);
         bgfx.vertex_layout_add(&vertexLayout, bgfx.Attrib.Position, 3, bgfx.AttribType.Float, false, false);
         bgfx.vertex_layout_add(&vertexLayout, bgfx.Attrib.Color0, 4, bgfx.AttribType.Uint8, true, false);
         bgfx.vertex_layout_end(&vertexLayout);
 
-        bgfx.VertexBufferHandle vbh;
-        bgfx.IndexBufferHandle ibh;
+        // Load the shader
         bgfx.ShaderHandle vsh = LoadShader("vs_cubes");
         bgfx.ShaderHandle fsh = LoadShader("fs_cubes");
         bgfx.ProgramHandle program = bgfx.create_program(vsh, fsh, true);
+        bgfx.destroy_shader(vsh);
+        bgfx.destroy_shader(fsh);
 
+        // Create buffers
+        bgfx.VertexBufferHandle vbh;
+        bgfx.IndexBufferHandle ibh;
         fixed (void* cubeVerticesPtr = cubeVertices)
         {
             vbh = bgfx.create_vertex_buffer(
@@ -109,9 +116,7 @@ public static unsafe class Program
 
         // Main game loop
         var running = true;
-
         uint counter = 0;
-        // Main loop for the program
         while (running)
         {
             // Check to see if there are any events and continue to do so until the queue is empty.
@@ -124,6 +129,7 @@ public static unsafe class Program
                         break;
                 }
             }
+
             // Update the bgfx frame
             Vector3 at = new(0.0f, 0.0f, 0.0f);
             Vector3 eye = new(0.0f, 0.0f, 10.0f);
@@ -146,9 +152,13 @@ public static unsafe class Program
             counter = bgfx.frame(false);
         }
 
-        // Destroy the vertex buffer and shutdown bgfx
-        // bgfx.destroy_vertex_buffer(vb);
+        // Destroy handles and shutdown bgfx
+        bgfx.destroy_vertex_buffer(vbh);
+        bgfx.destroy_index_buffer(ibh);
+        bgfx.destroy_program(program);
         bgfx.shutdown();
+
+        // Destroy sdl
         SDL.SDL_DestroyWindow(window);
         SDL.SDL_Quit();
     }
@@ -169,10 +179,6 @@ public static unsafe class Program
             case bgfx.RendererType.Direct3D11:
             case bgfx.RendererType.Direct3D12:
                 shaderPath = $"{shaderPath}/dx11/";
-                break;
-
-            case bgfx.RendererType.Gnm:
-                shaderPath = $"{shaderPath}/pssl/";
                 break;
 
             case bgfx.RendererType.Metal:

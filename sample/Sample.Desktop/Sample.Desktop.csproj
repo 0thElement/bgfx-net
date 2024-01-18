@@ -10,8 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SDL2-CS" Version="2.0.0" />
-    <PackageReference Include="SDL2-CS.NetCore" Version="2.0.8" />
+    <PackageReference Include="BgfxNet" Version="1.0.0" />
   </ItemGroup>
   
   <ItemGroup>
@@ -21,10 +20,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="shaders\**\*">
-      <Pack>true</Pack>
-      <PackagePath>runtimes</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\SDL2-CS\SDL2-CS.csproj" />
   </ItemGroup>
 
 </Project>
