@@ -100,7 +100,6 @@ jobs:
       uses: nttld/setup-ndk@v1
       with:
         ndk-version: r23c
-    - run: ls -R ${{ steps.setup-ndk.outputs.ndk-path }}
     - name: Build library
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}

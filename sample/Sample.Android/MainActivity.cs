@@ -176,7 +176,7 @@ public partial class MainActivity : Activity, ISurfaceHolderCallback
     {
         void Finish()
         {
-            var nativeWindow = ANativeWindow_fromSurface(JNIEnv.Handle, holder.Surface!.Handle);
+            nint nativeWindow = ANativeWindow_fromSurface(JNIEnv.Handle, holder.Surface!.Handle);
             if (renderer.WindowHandle != nint.Zero)
             {
                 ANativeWindow_release(renderer.WindowHandle);
@@ -191,6 +191,7 @@ public partial class MainActivity : Activity, ISurfaceHolderCallback
             {
                 try
                 {
+                    Log.Debug("SO", $"Initializing");
                     Initialize();
                 }
                 catch (Exception e)

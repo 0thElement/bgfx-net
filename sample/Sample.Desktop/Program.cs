@@ -68,7 +68,6 @@ public static unsafe class Program
         bgfxInit.resolution.height = WindowHeight;
         bgfxInit.platformData.nwh = pd.nwh;
         bgfxInit.platformData.ndt = pd.ndt;
-        bgfxInit.limits.transientVbSize = 1024 * 1024 * 24;
         bgfx.init(&bgfxInit);
         bgfx.reset(
             (uint)WindowWidth,

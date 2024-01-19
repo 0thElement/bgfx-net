@@ -2,7 +2,6 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Android.Util;
 using Bgfx;
-using Javax.Security.Auth;
 
 namespace Sample.Android;
 
@@ -24,26 +23,34 @@ public unsafe class Renderer
     public void Initialize()
     {
         OnDestroy();
-        var pd = new bgfx.PlatformData();
-        pd.ndt = null;
-        pd.nwh = WindowHandle.ToPointer();
+        Log.Debug("SO", $"WindowHandle {WindowHandle}");
+        var pd = new bgfx.PlatformData
+        {
+            ndt = null,
+            nwh = WindowHandle.ToPointer()
+        };
         bgfx.set_platform_data(&pd);
 
+        Log.Debug("SO", $"Initializing bgfx");
         bgfx.Init bgfxInit;
         bgfx.init_ctor(&bgfxInit);
-        bgfxInit.type = bgfx.RendererType.Count;
-        bgfxInit.vendorId = (ushort)bgfx.PciIdFlags.None;
+        bgfxInit.type = bgfx.RendererType.OpenGLES;
         bgfxInit.resolution.width = (uint)ScreenWidth;
         bgfxInit.resolution.height = (uint)ScreenHeight;
         bgfxInit.platformData.nwh = pd.nwh;
         bgfxInit.platformData.ndt = pd.ndt;
-        bgfxInit.limits.transientVbSize = 1024 * 1024 * 24;
+        if (!bgfx.init(&bgfxInit))
+        {
+            Log.Error("SO", $"Error initializing bgfx");
+        }
+
         bgfx.reset(
             (uint)ScreenWidth,
             (uint)ScreenHeight,
             (uint)(bgfx.ResetFlags.Vsync | bgfx.ResetFlags.Maxanisotropy | bgfx.ResetFlags.MsaaX16),
             bgfxInit.resolution.format);
         bgfx.set_debug((uint)(bgfx.DebugFlags.Stats | bgfx.DebugFlags.Text));
+        Log.Debug("SO", $"RenderType {bgfxInit.type}");
 
         // Set the view clear color and depth values
         bgfx.set_view_clear(0, (ushort)(bgfx.ClearFlags.Color | bgfx.ClearFlags.Depth), 0x443355FF, 1.0f, 0);
@@ -51,6 +58,7 @@ public unsafe class Renderer
         bgfx.set_view_rect(0, 0, 0, (ushort)ScreenWidth, (ushort)ScreenHeight);
 
         // Create the vertex layout
+        Log.Debug("SO", $"Create vertex layout");
         bgfx.VertexLayout vertexLayout;
         bgfx.vertex_layout_begin(&vertexLayout, bgfxInit.type);
         bgfx.vertex_layout_add(&vertexLayout, bgfx.Attrib.Position, 3, bgfx.AttribType.Float, false, false);
@@ -58,6 +66,7 @@ public unsafe class Renderer
         bgfx.vertex_layout_end(&vertexLayout);
 
         // Load the shader
+        Log.Debug("SO", $"Create shader");
         bgfx.ShaderHandle vsh = LoadShader("vs_cubes");
         bgfx.ShaderHandle fsh = LoadShader("fs_cubes");
         program = bgfx.create_program(vsh, fsh, true);
@@ -65,6 +74,7 @@ public unsafe class Renderer
         bgfx.destroy_shader(fsh);
 
         // Create buffers
+        Log.Debug("SO", $"Create buffer");
         fixed (void* cubeVerticesPtr = cubeVertices)
         {
             vbh = bgfx.create_vertex_buffer(
@@ -84,7 +94,7 @@ public unsafe class Renderer
 
     public void Update(long nanoTime)
     {
-        if (!Available)
+        if (!Available || !initialized)
         {
             return;
         }
@@ -122,21 +132,25 @@ public unsafe class Renderer
     {
         if (vbh.Valid)
         {
+            Log.Debug("SO", $"Destroying vertex buffer");
             bgfx.destroy_vertex_buffer(vbh);
         }
 
         if (ibh.Valid)
         {
+            Log.Debug("SO", $"Destroying index buffer");
             bgfx.destroy_index_buffer(ibh);
         }
 
         if (program.Valid)
         {
+            Log.Debug("SO", $"Destroying program");
             bgfx.destroy_program(program);
         }
 
         if (initialized)
         {
+            Log.Debug("SO", $"Shutting down bgfx");
             bgfx.shutdown();
         }
     }
